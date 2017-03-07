@@ -1,0 +1,138 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Proficy.CIMPLICITY;
+using System.Windows.Forms;
+using System.Xml;
+using System.Xml.XPath;
+using System.Xml.Serialization;
+using System.IO;
+using SerializeLib;
+
+
+public class XmlSerAndDeserWithList
+{
+    public void Main()
+    {
+		//XmlSerAndDeserWithList.Serialize();
+		XmlSerAndDeserWithList.Deserialize();
+		//XmlSerAndDeserWithList.SerializeProductList();				
+    }
+	
+	private static void Serialize()		
+	{		
+		clsProduct product = new clsProduct{Id = "P01", Name = "Product 1", Categoryname =  "Category1",
+			         price = new clsProduct.clsPrice{Value = 100, Unit = "USD"}, 
+			   description = new clsProduct.clsDescription{Color =  "Blue", Size = "Size 1", Weight = "100gr"}};
+		
+		XmlSerializer xs = new XmlSerializer(typeof(clsProduct));
+		StreamWriter sw =  new StreamWriter(@"C:\Users\1374500\Desktop\Product.xml");		
+		
+		xs.Serialize(sw, product);
+		sw.Close();
+		Cimplicity.Trace("Xml Serialization is Completed Successfully");	
+	}
+	
+	private static void Deserialize()
+	{
+		XmlSerializer xs = new XmlSerializer(typeof(clsProduct));
+		StreamReader sr =  new StreamReader(@"C:\Users\1374500\Desktop\Product.xml");
+		clsProduct prod =  (clsProduct)xs.Deserialize(sr);
+		Cimplicity.Trace("Id = " + prod.Id);
+		Cimplicity.Trace("Name = " + prod.Name);
+		Cimplicity.Trace("Category = " + prod.Categoryname);
+		Cimplicity.Trace("Value = " + prod.price.Value);
+		Cimplicity.Trace("Unit = " + prod.price.Unit);
+		Cimplicity.Trace("Color = " + prod.description.Color);
+		Cimplicity.Trace("Size = " + prod.description.Size);
+		Cimplicity.Trace("Weight = " + prod.description.Weight);	
+		sr.Close();
+		sr.Dispose();
+		Cimplicity.Trace("Xml Deserialization is Completed Successfully");
+	}
+	
+	
+	private static void SerializeProductList()
+	{		
+		
+		List<clsProduct> listProducts = new List<clsProduct>(); 
+		
+		listProducts.Add( new clsProduct{Id = "P01", Name = "Product 1", Categoryname =  "Category1",
+				  price = new clsProduct.clsPrice{Value = 100, Unit = "USD"}, 
+			description = new clsProduct.clsDescription{Color =  "Red", Size = "Size 1", Weight = "100gr"}});
+		
+		listProducts.Add( new clsProduct{Id = "P02", Name = "Product 2", Categoryname =  "Category2",
+				  price = new clsProduct.clsPrice{Value = 200, Unit = "USD"}, 
+			description = new clsProduct.clsDescription{Color =  "Green", Size = "Size 2", Weight = "200gr"}});
+		
+		listProducts.Add( new clsProduct{Id = "P03", Name = "Product 3", Categoryname =  "Category3",
+				  price = new clsProduct.clsPrice{Value = 300, Unit = "USD"}, 
+			description = new clsProduct.clsDescription{Color =  "Blue", Size = "Size 3", Weight = "300gr"}});		
+		
+		XmlSerializer xs = new XmlSerializer(typeof(List<clsProduct>));
+		StreamWriter sw =  new StreamWriter(@"C:\Users\1374500\Desktop\ListProduct.xml");		
+		
+		xs.Serialize(sw, listProducts);
+		sw.Close();
+		Cimplicity.Trace("Xml Serialization is Completed Successfully");	
+	}
+	
+}
+
+
+
+namespace SerializeLib
+	
+{
+	//<Product Id="P01" Categoryname="Category1">
+	[XmlRoot("Product")]
+	public class clsProduct
+	{
+		[XmlAttribute("Id")]
+		public string Id{get; set;}
+		//[XmlIgnore]
+		[XmlAttribute("Categoryname")]
+		public string Categoryname{get; set;}
+		[XmlElement("Name")]
+		public string Name{get; set;}
+		
+		[XmlElement("Price")]
+		public clsPrice price{get; set;}
+		[XmlElement("Description")]
+		public clsDescription description{get; set;}	
+		
+		/*
+			<Price Unit="USD">100</Price>
+		*/
+		
+		[XmlRoot("Price")]
+		public class clsPrice			
+		{
+			[XmlAttribute("Unit")]
+			public string Unit{get; set;}
+			[XmlText]
+			public int Value{get; set;}	
+		}
+		
+		
+		/*
+		 <Description>
+    		<Color>red</Color>
+    		<Size>Size 1</Size>
+    		<Weight>100gr</Weight>
+  		 </Description>
+		*/
+		[XmlRoot("Description")]
+		public class clsDescription			
+		{
+			[XmlElement("Color")]
+			public string Color{get; set;}
+			[XmlElement("Size")]
+			public string Size{get; set;}
+			[XmlElement("Weight")]
+			public string Weight{get; set;}
+		}
+
+	}
+	
+}
